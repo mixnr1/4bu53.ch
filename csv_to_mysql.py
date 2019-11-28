@@ -24,6 +24,7 @@ for csv_f in csv_files:
     if csv_f.endswith('csv'):
         with open(os.path.join(csv_dir, csv_f)) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')           
+            val=[]
             for row in csv_reader:
                 if row[0].startswith('#'):
                     pass
@@ -40,7 +41,10 @@ for csv_f in csv_files:
                     reporter = str(row[7])
                     # print(id + " , " + dateadded + " , " + protocol + " , " + domain + " , " + link+ " , " + url_status+ " , " + threat+ " , " + tags+ " , " + urlhaus_link + " , " + reporter)
                     rline = (id, dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter)
-                    mycursor.execute('INSERT IGNORE INTO abuse(id, dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter)  VALUES("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s")', rline) 
+                    val.append(rline)
+                    
+            sql="INSERT IGNORE INTO abuse(id, dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter)  VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            mycursor.executemany(sql, val)
             mydb.commit()
 end = time.time()
 end_tuple = time.localtime()
