@@ -13,6 +13,11 @@ mydb = mysql.connector.connect(
     database=config.mydb_database
     ) 
 mycursor = mydb.cursor()
+
+mycursor.execute("DROP TABLE IF EXISTS abuse;")
+mycursor.execute("CREATE TABLE abuse (id VARCHAR(255), dateadded VARCHAR(255), protocol LONGTEXT, domain LONGTEXT, link TEXT, url_status VARCHAR(255), threat VARCHAR(255), tags VARCHAR(255), urlhaus_link VARCHAR(255), reporter VARCHAR(255))")    
+
+
 csv_dir=config.abuse_data
 csv_files=[entry for entry in os.listdir(csv_dir) if os.path.isfile(os.path.join(csv_dir, entry))]
 for csv_f in csv_files:
@@ -23,7 +28,19 @@ for csv_f in csv_files:
                 if row[0].startswith('#'):
                     pass
                 else:
-                    mycursor.execute('INSERT INTO abuse(id, dateadded, url, url_status, threat, tags, urlhaus_link, reporter)  VALUES("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s")', row) 
+                    id = str(row[0])
+                    dateadded = str(row[1])
+                    protocol = str(row[2]).split('://')[0]
+                    domain = str(row[2]).split('//')[-1].split('/')[0]
+                    link = str(row[2]).split('//')[-1].split('/')[-1]
+                    url_status = str(row[3])
+                    threat = str(row[4])
+                    tags = str(row[5])
+                    urlhaus_link = str(row[6])
+                    reporter = str(row[7])
+                    # print(id + " , " + dateadded + " , " + protocol + " , " + domain + " , " + link+ " , " + url_status+ " , " + threat+ " , " + tags+ " , " + urlhaus_link + " , " + reporter)
+                    rline = (id, dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter)
+                    mycursor.execute('INSERT IGNORE INTO abuse(id, dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter)  VALUES("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s")', rline) 
             mydb.commit()
 end = time.time()
 end_tuple = time.localtime()
