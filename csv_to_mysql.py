@@ -6,6 +6,9 @@ import mysql.connector
 start = time.time()
 start_tuple=time.localtime()
 start_time = time.strftime("%Y-%m-%d %H:%M:%S", start_tuple)
+csv_dir=config.abuse_data
+command="https_proxy="+config.proxy_settings+" wget -O "+csv_dir+"abuse.csv 'https://urlhaus.abuse.ch/downloads/csv/'"
+os.system(command)
 mydb = mysql.connector.connect(
     host=config.mydb_host,
     user=config.mydb_user,
@@ -33,7 +36,7 @@ for csv_f in csv_files:
                     dateadded = str(row[1])
                     protocol = str(row[2]).split('://')[0]
                     domain = str(row[2]).split('//')[-1].split('/')[0]
-                    link = str(row[2]).split('//')[-1].split('/')[-1]
+                    link = str(row[2]).split('//')[-1].split('/', 1)[-1]
                     url_status = str(row[3])
                     threat = str(row[4])
                     tags = str(row[5])

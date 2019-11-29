@@ -12,7 +12,9 @@ mydb = mysql.connector.connect(
     ) 
 mycursor = mydb.cursor()
 
-mycursor.execute("SELECT d.* FROM downloads as d inner join abuse as a WHERE d.link = CONCAT(a.protocol,'://',a.domain,'/',a.link);")
+# mycursor.execute("SELECT d.* FROM downloads as d inner join abuse as a WHERE d.link = CONCAT(a.protocol,'://',a.domain,'/',a.link);")
+mycursor.execute("SELECT h.* FROM tmp_history as h inner join abuse as a on concat(h.protocol,h.domain,h.link) = concat(a.protocol,a.domain,a.link);
+h.link = CONCAT(a.protocol,'://',a.domain,'/',a.link);")
 myresult = mycursor.fetchall()
 for x in myresult:
     print(x)
