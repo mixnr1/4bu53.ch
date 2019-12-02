@@ -49,6 +49,7 @@ for csv_f in csv_files:
             sql="INSERT IGNORE INTO abuse(id, dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter)  VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
             mycursor.executemany(sql, val)
             mydb.commit()
+        os.remove(csv_dir+csv_f)
 end = time.time()
 end_tuple = time.localtime()
 end_time = time.strftime("%Y-%m-%d %H:%M:%S", end_tuple)
