@@ -9,3 +9,6 @@ abuse.csv
 .gitignore
 error.py
 
+backup/abuse.tar.gz
+backup/browserdb.tar.gz
+backup/Untitled Folder/abuse.sql

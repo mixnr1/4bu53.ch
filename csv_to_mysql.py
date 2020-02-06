@@ -88,33 +88,36 @@ if check_if_tables_exsist():
                         urlhaus_link = str(row[6])
                         reporter = str(row[7])
                         rline = (dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter)
-                        val.append(rline)                
-                #if record not present in table, insert new record 
-                for i in val:
-                    dateadded = i[0]
-                    protocol = i[1]
-                    domain = i[2]
-                    link = i[3]
-                    url_status = i[4]
-                    threat = i[5]
-                    tags = i[6]
-                    urlhaus_link = i[7]
-                    reporter = i[8]                    
-                    against_fraze = dateadded+protocol+domain+link+url_status+threat+tags+urlhaus_link+reporter
-                    like_fraze = dateadded+protocol+domain+link+url_status+threat+tags+urlhaus_link+reporter
-                    query = (
-                        """
-                            SELECT count(abuseid) FROM abuse 
-                            WHERE MATCH (dateadded,protocol,domain,link,url_status,threat,tags,urlhaus_link,reporter) AGAINST (%s)
-                            AND CONCAT(dateadded,protocol,domain,link,url_status,threat,tags,urlhaus_link,reporter) LIKE %s
-                        """
-                    )
-                    mycursor.execute(query, (against_fraze, like_fraze))
-                    skaits = mycursor.fetchone()
-                    if skaits[0] == 0:
-                        sql = "INSERT INTO abuse (dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')"
-                        mycursor.execute(sql % (dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter))
-                mydb.commit()
+                        val.append(rline) 
+            for i in list(list_in_chunks(val, 1000)):
+                sql = "INSERT INTO abuse (dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+                mycursor.executemany(sql, i)                  
+                # #if record not present in table, insert new record 
+                # for i in val:
+                #     dateadded = i[0]
+                #     protocol = i[1]
+                #     domain = i[2]
+                #     link = i[3]
+                #     url_status = i[4]
+                #     threat = i[5]
+                #     tags = i[6]
+                #     urlhaus_link = i[7]
+                #     reporter = i[8]                    
+                #     against_fraze = dateadded+protocol+domain+link+url_status+threat+tags+urlhaus_link+reporter
+                #     like_fraze = dateadded+protocol+domain+link+url_status+threat+tags+urlhaus_link+reporter
+                #     query = (
+                #         """
+                #             SELECT count(abuseid) FROM abuse 
+                #             WHERE MATCH (dateadded,protocol,domain,link,url_status,threat,tags,urlhaus_link,reporter) AGAINST (%s)
+                #             AND CONCAT(dateadded,protocol,domain,link,url_status,threat,tags,urlhaus_link,reporter) LIKE %s
+                #         """
+                #     )
+                #     mycursor.execute(query, (against_fraze, like_fraze))
+                #     skaits = mycursor.fetchone()
+                #     if skaits[0] == 0:
+                #         sql = "INSERT INTO abuse (dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')"
+                #         mycursor.execute(sql % (dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter))
+                # mydb.commit()
     query = "ALTER TABLE abuse ADD FULLTEXT(dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter);"
     mycursor.execute(query)
     mydb.commit()
