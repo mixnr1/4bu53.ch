@@ -30,7 +30,6 @@ def create_tables():
                 tags VARCHAR(255), 
                 urlhaus_link VARCHAR(255), 
                 reporter VARCHAR(255), 
-                FULLTEXT(dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter),
                 PRIMARY KEY (abuseid)
             );
         """
@@ -47,7 +46,6 @@ def check_if_tables_exsist():
     ) 
     mycursor = mydb.cursor()
     stmt = "show tables FROM browserdb WHERE Tables_in_browserdb LIKE 'abuse';"
-    # stmt = f"show tables FROM {dbname} WHERE Tables_in_{dbname} LIKE 'abuse';"
     mycursor.execute(stmt)
     return mycursor.fetchall()
 
@@ -117,6 +115,9 @@ if check_if_tables_exsist():
                         sql = "INSERT INTO abuse (dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')"
                         mycursor.execute(sql % (dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter))
                 mydb.commit()
+    query = "ALTER TABLE abuse ADD FULLTEXT(dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter);"
+    mycursor.execute(query)
+    mydb.commit()
 else:
     print("Didn't found any tables")
     create_tables()
@@ -152,6 +153,8 @@ else:
             for i in list(list_in_chunks(val, 1000)):
                 sql = "INSERT INTO abuse (dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
                 mycursor.executemany(sql, i)
+    query = "ALTER TABLE abuse ADD FULLTEXT(dateadded, protocol, domain, link, url_status, threat, tags, urlhaus_link, reporter);"
+    mycursor.execute(query)
     mydb.commit()
 
 
